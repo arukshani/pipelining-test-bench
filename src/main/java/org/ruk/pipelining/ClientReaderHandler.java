@@ -59,7 +59,7 @@ public class ClientReaderHandler extends ChannelInboundHandlerAdapter {
         while (true) {
             sendPipeliningRequest("TestMsg" + Integer.toString(messageId));
             if (messageId == expectedNoOfMessages - 1) {
-                setStopReceivingMessages();
+               // setStopReceivingMessages();
                 break;
             }
             messageId++;
@@ -80,6 +80,7 @@ public class ClientReaderHandler extends ChannelInboundHandlerAdapter {
             }
 
             if (expectedNoOfMessages == noOfMessagesReceived.incrementAndGet()) {
+                log.info("Channel about to be closed:" + clientId);
                 ctx.writeAndFlush(ChannelFutureListener.CLOSE);
             }
         } else {
@@ -121,21 +122,12 @@ public class ClientReaderHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void setStopReceivingMessages() {
-        if (expectedNoOfMessages == -1) {
+       /* if (expectedNoOfMessages == -1) {
             ctx.writeAndFlush(ChannelFutureListener.CLOSE);
-        }
+        }*/
     }
 
     public static String getEntityBodyFrom(FullHttpResponse httpResponse) {
-        // ByteBuffer content = httpResponse.content().nioBuffer();
-       /* StringBuilder stringContent = new StringBuilder();
-        while (content.hasRemaining()) {
-            stringContent.append((char) content.get());
-        }
-        System.out.print("Extract body from response" + stringContent.toString());
-        return stringContent.toString();*/
-        // httpResponse.status();
-      //  System.out.print(httpResponse.status());
         return httpResponse.content().toString(CharsetUtil.UTF_8);
     }
 

@@ -3,26 +3,19 @@ package org.ruk.pipelining;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpRequestEncoder;
-import io.netty.handler.codec.http.HttpResponseDecoder;
-import io.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,22 +43,6 @@ public class HttpPipeliningClient {
     }
 
     public void init() throws URISyntaxException, SSLException, InterruptedException {
-       /* URI uri = new URI(url);
-        String scheme = uri.getScheme() == null ? "http" : uri.getScheme();
-        final String host = uri.getHost() == null ? "127.0.0.1" : uri.getHost();
-        final int port;
-        if (uri.getPort() == -1) {
-            if ("http".equalsIgnoreCase(scheme)) {
-                port = 80;
-            } else if ("https".equalsIgnoreCase(scheme)) {
-                port = 443;
-            } else {
-                port = -1;
-            }
-        } else {
-            port = uri.getPort();
-        }*/
-
         EventLoopGroup group = new NioEventLoopGroup();
         ClientReaderHandler handler = new ClientReaderHandler(clientId, expectedNoOfMessages, messageQueue,
                 group, countDownLatch);
@@ -79,19 +56,28 @@ public class HttpPipeliningClient {
                         @Override
                         public void initChannel(SocketChannel ch)
                                 throws Exception {
-                           // ch.pipeline().addLast("decoder", new HttpResponseDecoder());
                             ch.pipeline().addLast(new HttpClientCodec());
                             ch.pipeline().addLast(new HttpObjectAggregator(1024 * 512));
-                           // ch.pipeline().addLast("encoder", new HttpRequestEncoder());
                             ch.pipeline().addLast(handler);
                         }
                     });
+            b.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 150000);
             ChannelFuture f = b.connect().sync();
             channel = f.channel();
             PipeliningRunner.addConnection();
-            f.channel().closeFuture().sync();
+           /* f.addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess() && future.isDone()) {
+
+                    //   future.channel().write(httpRequest);
+
+
+                } else {
+                    log.error("Error occurred while trying to connect to redirect channel.", f.cause());
+                }
+            });*/
+            f.channel().closeFuture().sync(); //Blocks until the channel closes
         } finally {
-            group.shutdownGracefully().sync();
+              group.shutdownGracefully().sync();
         }
     }
 

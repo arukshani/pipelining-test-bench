@@ -52,19 +52,6 @@ public class PipeliningRunner implements Runnable {
             log.info("PipeliningRunner Run", clientId);
             pipeliningClient.init();
             startTime = System.currentTimeMillis();
-           /* log.info("Client {}: Sending messages...", clientId);
-
-            int messageId = 0;
-            while (true) {
-                pipeliningClient.sendPipeliningRequest(Integer.toString(messageId));
-                if (stopSendingMessages || messageId == noOfMessages - 1) {
-                    pipeliningClient.stop();
-                    break;
-                }
-                messageId++;
-                Thread.sleep(messageDelay);
-            }*/
-
         } catch (URISyntaxException | SSLException | InterruptedException e) {
             log.error("Error : ", e);
             Thread.currentThread().interrupt();

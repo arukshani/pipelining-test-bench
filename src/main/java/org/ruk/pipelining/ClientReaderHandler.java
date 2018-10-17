@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,17 +82,19 @@ public class ClientReaderHandler extends ChannelInboundHandlerAdapter {
 
             if (expectedNoOfMessages == noOfMessagesReceived.incrementAndGet()) {
                 log.info("Channel about to be closed:" + clientId);
-                ctx.writeAndFlush(ChannelFutureListener.CLOSE);
+                ctx.close();
             }
         } else {
             System.out.println("Not a full http response");
         }
+        ReferenceCountUtil.release(msg);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx,
                                 Throwable cause) {
-        cause.printStackTrace();
+       // cause.printStackTrace();
+        log.error("Exception occurred closing the connection", cause.getMessage());
         ctx.close();
     }
 

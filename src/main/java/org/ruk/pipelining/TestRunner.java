@@ -67,10 +67,10 @@ public class TestRunner {
                 totalNoOfErrorMessages = totalNoOfErrorMessages + pi.getNoOfErrorMessages();
                 double tps = calculateTPS(noOfMessages, pi);
                 totalTPS = totalTPS + tps;
-                log.info("Client {}: Test run TPS: {}", pi.getClientId(), tps);
+               // log.info("Client {}: Test run TPS: {}", pi.getClientId(), tps);
             }
 
-            log.info("Average TPS per client: {}", (totalTPS / noOfConnections));
+          //  log.info("Average TPS per client: {}", (totalTPS / noOfConnections));
 
             TimeFormatter timeFormatter = new TimeFormatter(testTimeInMinutes > 0 ? testTimeInMinutes * 60 * 1000 :
                     testEndTime - testStartTime);
@@ -80,7 +80,7 @@ public class TestRunner {
             log.info("Max no of concurrent connections: {}/{}", PipeliningRunner.getMaxNoOfActiveConnections(),
                     noOfConnections);
 
-            log.info("Total no of message round trips: {}", totalNoOfMessages);
+         //   log.info("Total no of message round trips: {}", totalNoOfMessages);
 
             log.info("No of error messages: {} out of {}", totalNoOfErrorMessages, totalNoOfMessages);
 
